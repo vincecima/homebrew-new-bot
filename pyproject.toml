@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "homebrew-new-bot"
+version = "0.1.0"
+description = ""
+authors = ["Vince Cima <contact@vincecima.com>"]
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "^3.11"
+toot = "^0.37.0"
+requests = "^2.31.0"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.0.277"
+black = "^23.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
