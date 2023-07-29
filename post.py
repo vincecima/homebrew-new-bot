@@ -131,11 +131,11 @@ def get_metadata_for_formula(formula_title: str) -> Formula:
 
 def schedule_toot(formula: Formula, scheduled_at: datetime):
     toot_content = f"""
-    🍻 {formula.name} 🍻
+🍻 {formula.name} 🍻
 
-    {formula.description}
+{formula.description}
 
-    🔗 {formula.homepage}
+🔗 {formula.homepage}
     """
     logging.debug(f"toot_content = {toot_content}")
 
