@@ -136,6 +136,8 @@ def schedule_toot(formula: Formula, scheduled_at: datetime):
 {formula.description}
 
 🔗 {formula.homepage}
+
+#homebrew #newpkg #macos #linux
     """
     logging.debug(f"toot_content = {toot_content}")
 
