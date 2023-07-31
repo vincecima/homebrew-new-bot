@@ -33,6 +33,8 @@ jobs:
     - name: Run bot script
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+        MAX_TOOTS_PER_EXECUTION: ${{ vars.MAX_TOOTS_PER_EXECUTION }}
       run: poetry run python3 post.py
     - name: Commit changes to state directory
       uses: EndBug/add-and-commit@v9
