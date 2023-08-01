@@ -1,1 +1,12 @@
-.env
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate backup files
+*.tfstate.*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# tfvars files with values
+**/terraform.tfvars
