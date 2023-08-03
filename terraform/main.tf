@@ -37,19 +37,9 @@ resource "github_actions_variable" "mastodon_api_base_url" {
   value         = "https://botsin.space"
 }
 
-resource "github_actions_secret" "toot_config" {
-  repository      = "homebrew-new-bot"
-  secret_name     = "TOOT_CONFIG"
-  plaintext_value = ""
-
-  lifecycle {
-    ignore_changes = [plaintext_value]
-  }
-}
-
 resource "github_actions_secret" "mastodon_access_token" {
   repository      = "homebrew-new-bot"
-  secret_name     = "MASTODON_ACCESS_TOKEN"
+  secret_name     = "mastodon_access_token"
   plaintext_value = ""
 
   lifecycle {
@@ -59,7 +49,7 @@ resource "github_actions_secret" "mastodon_access_token" {
 
 resource "github_actions_secret" "mastodon_client_secret" {
   repository      = "homebrew-new-bot"
-  secret_name     = "MASTODON_CLIENT_SECRET"
+  secret_name     = "mastodon_client_secret"
   plaintext_value = ""
 
   lifecycle {
