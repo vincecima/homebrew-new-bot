@@ -24,17 +24,14 @@ jobs:
       run: poetry install
     - name: Add venv bin to PATH
       run: echo "$(poetry env info --path)/bin" >> $GITHUB_PATH
-    - name: Configure toot CLI
-      env:
-        TOOT_CONFIG: ${{ secrets.TOOT_CONFIG }}
-      run: |-
-        mkdir -p ~/.config/toot
-        echo $TOOT_CONFIG > ~/.config/toot/config.json
     - name: Run bot script
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         LOG_LEVEL: ${{ vars.LOG_LEVEL }}
         MAX_TOOTS_PER_EXECUTION: ${{ vars.MAX_TOOTS_PER_EXECUTION }}
+        MASTODON_API_BASE_URL: ${{ vars.MASTODON_API_BASE_URL }}
+        MASTODON_CLIENT_SECRET: ${{ secrets.MASTODON_CLIENT_SECRET }}
+        MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
       run: poetry run python3 post.py
     - name: Commit changes to state directory
       uses: EndBug/add-and-commit@v9

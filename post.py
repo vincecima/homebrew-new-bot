@@ -7,6 +7,7 @@ import requests
 import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from mastodon import Mastodon
 
 HOMEBREW_GET_FORMULA_URL = "https://formulae.brew.sh/api/formula/{}.json"
 PR_TITLE_PATTERN = re.compile(r"([0-9,a-z,\-,\\,\/]+)", re.IGNORECASE)
@@ -129,7 +130,7 @@ def get_metadata_for_formula(formula_title: str) -> Formula:
         logging.error(err)
 
 
-def schedule_toot(formula: Formula, scheduled_at: datetime):
+def schedule_toot(formula: Formula, scheduled_at: datetime, mastodon: Mastodon):
     toot_content = f"""
 🍻 {formula.name} 🍻
 
@@ -143,18 +144,14 @@ def schedule_toot(formula: Formula, scheduled_at: datetime):
 
     logging.info(f"Posting new toot for {formula.name} @ {scheduled_at.isoformat()}")
 
-    completed_process = subprocess.run(
-        [
-            "toot",
-            "post",
-            "--scheduled-at",
-            scheduled_at.isoformat(),
-            toot_content,
-        ],
-        capture_output=True,
-    )
-    if completed_process.returncode > 0:
-        logging.error(completed_process.stderr)
+    try:
+        scheduled_post = mastodon.status_post(
+            status=toot_content, scheduled_at=scheduled_at
+        )
+        logging.debug(f"scheduled_post = {scheduled_post}")
+    except Exception as ex:
+        logging.warning(f"Scheduling status for {formula.name} failed")
+        logging.error(ex)
         exit(1)
 
     return
@@ -164,10 +161,24 @@ def main():
     LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
     logging.basicConfig(level=LOG_LEVEL)
 
+    MASTODON_API_BASE_URL = os.environ.get("MASTODON_API_BASE_URL")
+    MASTODON_ACCESS_TOKEN = os.environ.get("MASTODON_ACCESS_TOKEN")
+    MASTODON_CLIENT_SECRET = os.environ.get("MASTODON_CLIENT_SECRET")
     MAX_TOOTS_PER_EXECUTION = int(os.environ.get("MAX_TOOTS_PER_EXECUTION", "3"))
 
+    if not all([MASTODON_API_BASE_URL, MASTODON_ACCESS_TOKEN, MASTODON_CLIENT_SECRET]):
+        logging.error(
+            "MASTODON_API_BASE_URL, MASTODON_ACCESS_TOKEN and MASTODON_CLIENT_SECRET must be set"
+        )
+        exit(1)
+
     logging.info(
-        f"Environment variables = LOG_LEVEL={LOG_LEVEL}, MAX_TOOTS_PER_EXECUTION={MAX_TOOTS_PER_EXECUTION}"
+        f"""
+Environment variables =
+ LOG_LEVEL={LOG_LEVEL},
+ MAX_TOOTS_PER_EXECUTION={MAX_TOOTS_PER_EXECUTION},
+ MASTODON_API_BASE_URL={MASTODON_API_BASE_URL}
+        """
     )
 
     merged_after = get_last_merged_state_value()
@@ -180,6 +191,11 @@ def main():
         logging.info(f"Found {len(prs)} new formula to toot")
 
     scheduled_at = datetime.now(timezone.utc)
+    mastodon = Mastodon(
+        api_base_url=MASTODON_API_BASE_URL,
+        access_token=MASTODON_ACCESS_TOKEN,
+        client_secret=MASTODON_CLIENT_SECRET,
+    )
     prs.sort(key=lambda pr: pr.merged_at)
 
     for i, pr in enumerate(prs):
@@ -192,7 +208,7 @@ def main():
         formula_title = parse_pr_title(pr.title)
         formula = get_metadata_for_formula(formula_title)
         scheduled_at = scheduled_at + timedelta(minutes=random.randint(10, 25))
-        schedule_toot(formula, scheduled_at)
+        schedule_toot(formula, scheduled_at, mastodon)
         set_last_merged_state_value(pr.merged_at)
 
     exit(0)
