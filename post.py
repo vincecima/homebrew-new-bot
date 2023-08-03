@@ -7,7 +7,7 @@ import requests
 import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from mastodon import Mastodon
+from mastodon import Mastodon  # type: ignore
 
 HOMEBREW_GET_FORMULA_URL = "https://formulae.brew.sh/api/formula/{}.json"
 PR_TITLE_PATTERN = re.compile(r"([0-9,a-z,\-,\\,\/]+)", re.IGNORECASE)
@@ -45,7 +45,7 @@ def get_last_merged_state_value() -> datetime:
     return merged_after
 
 
-def set_last_merged_state_value(merged_at: datetime):
+def set_last_merged_state_value(merged_at: datetime) -> None:
     logging.debug(f"Writing merged_after = {merged_at.isoformat()}")
 
     try:
@@ -61,8 +61,8 @@ def set_last_merged_state_value(merged_at: datetime):
 
 
 def get_newly_merged_prs(merged_after: datetime) -> list[PR]:
-    search_query = f'q=is:pr is:merged owner:Homebrew repo:homebrew-core label:"new formula"\
-                merged:>{merged_after.isoformat()}'
+    search_query = f'q=is:pr is:merged owner:Homebrew repo:homebrew-core\
+     label:"new formula" merged:>{merged_after.isoformat()}'
     logging.debug(f"Search query = {search_query}")
 
     completed_process = subprocess.run(
@@ -100,10 +100,10 @@ def parse_pr_title(title: str) -> str:
 
     if match is None:
         logging.warning(f"PR title '{title}' did not match expected pattern")
-        return None
+        exit(1)
     elif len(match.groups()) > 1:
         logging.warning(f"PR title '{title}' resulted in > 1 match")
-        return None
+        exit(1)
     else:
         logging.debug(f"Parsed PR title group 1 = {match.group(0)}")
         return match.group(0)
@@ -128,9 +128,10 @@ def get_metadata_for_formula(formula_title: str) -> Formula:
     except Exception as err:
         logging.warning(f"Request for {full_url} failed")
         logging.error(err)
+        exit(1)
 
 
-def schedule_toot(formula: Formula, scheduled_at: datetime, mastodon: Mastodon):
+def schedule_toot(formula: Formula, scheduled_at: datetime, mastodon: Mastodon) -> None:
     toot_content = f"""
 🍻 {formula.name} 🍻
 
@@ -157,7 +158,7 @@ def schedule_toot(formula: Formula, scheduled_at: datetime, mastodon: Mastodon):
     return
 
 
-def main():
+def main() -> None:
     LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
     logging.basicConfig(level=LOG_LEVEL)
 
@@ -168,7 +169,8 @@ def main():
 
     if not all([MASTODON_API_BASE_URL, MASTODON_ACCESS_TOKEN, MASTODON_CLIENT_SECRET]):
         logging.error(
-            "MASTODON_API_BASE_URL, MASTODON_ACCESS_TOKEN and MASTODON_CLIENT_SECRET must be set"
+            "MASTODON_API_BASE_URL, MASTODON_ACCESS_TOKEN and MASTODON_CLIENT_SECRET\
+             must be set"
         )
         exit(1)
 
