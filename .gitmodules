@@ -1,0 +1,3 @@
+[submodule "state/core"]
+	path = state/core
+	url = git@github.com:Homebrew/homebrew-core.git
