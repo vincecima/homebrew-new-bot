@@ -1,1 +1,3 @@
 github_token = ""
+mastodon_access_token_encrypted = ""
+mastodon_client_secret_encrypted = ""

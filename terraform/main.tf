@@ -15,6 +15,18 @@ variable "github_token" {
   sensitive   = true
 }
 
+variable "mastodon_access_token_encrypted" {
+  description = "Access token to post to Mastodon account"
+  type        = string
+  sensitive   = true
+}
+
+variable "mastodon_client_secret_encrypted" {
+  description = "Client secret to post to Mastodon account"
+  type        = string
+  sensitive   = true
+}
+
 provider "github" {
   token = var.github_token
 }
@@ -40,19 +52,11 @@ resource "github_actions_variable" "mastodon_api_base_url" {
 resource "github_actions_secret" "mastodon_access_token" {
   repository      = "homebrew-new-bot"
   secret_name     = "mastodon_access_token"
-  plaintext_value = ""
-
-  lifecycle {
-    ignore_changes = [plaintext_value]
-  }
+  encrypted_value = var.mastodon_access_token_encrypted
 }
 
 resource "github_actions_secret" "mastodon_client_secret" {
   repository      = "homebrew-new-bot"
   secret_name     = "mastodon_client_secret"
-  plaintext_value = ""
-
-  lifecycle {
-    ignore_changes = [plaintext_value]
-  }
+  encrypted_value = var.mastodon_client_secret_encrypted
 }
