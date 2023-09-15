@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from mastodon import Mastodon  # type: ignore
 
 HOMEBREW_GET_FORMULA_URL = "https://formulae.brew.sh/api/formula/{}.json"
-PR_TITLE_PATTERN = re.compile(r"([0-9,a-z,\-,\\,\/]+)", re.IGNORECASE)
+PR_TITLE_PATTERN = re.compile(r"([0-9,a-z,\-,\_,\\,\/]+)", re.IGNORECASE)
 
 
 @dataclass
