@@ -207,6 +207,7 @@ Environment variables =
             )
             exit(0)
 
+        logging.debug(f"Retrieving data for pr.title = {pr.title}, pr.merged_at = {pr.merged_at}")
         formula_title = parse_pr_title(pr.title)
         formula = get_metadata_for_formula(formula_title)
         scheduled_at = scheduled_at + timedelta(minutes=random.randint(10, 25))
