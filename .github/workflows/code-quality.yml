@@ -1,7 +1,6 @@
 name: Run all code quality tools
 
 on:
-  pull_request:
   push:
 
 jobs:
