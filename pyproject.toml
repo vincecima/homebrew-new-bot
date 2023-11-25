@@ -13,7 +13,6 @@ mastodon-py = "^1.8.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.0.277"
-black = "^23.3.0"
 mypy = "^1.4.1"
 types-requests = "^2.31.0.2"
 

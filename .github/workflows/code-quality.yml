@@ -20,6 +20,5 @@ jobs:
           cache: 'poetry'
       - name: Install dependencies
         run: poetry install --only=dev
-      - run: poetry run black --check .
       - run: poetry run ruff check .
       - run: poetry run mypy --strict .
