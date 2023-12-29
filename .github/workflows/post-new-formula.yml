@@ -1,4 +1,4 @@
-name: Post new formula and casks
+name: Post new formula
 
 on:
   workflow_dispatch:
@@ -32,7 +32,7 @@ jobs:
         MASTODON_API_BASE_URL: ${{ vars.MASTODON_API_BASE_URL }}
         MASTODON_CLIENT_SECRET: ${{ secrets.MASTODON_CLIENT_SECRET }}
         MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-      run: poetry run python3 post.py
+      run: poetry run new-formula
     - name: Commit changes to state directory
       if: ${{ always() }}
       uses: EndBug/add-and-commit@v9

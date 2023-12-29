@@ -10,3 +10,6 @@ terraform.rc
 
 # tfvars files with values
 **/terraform.tfvars
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
