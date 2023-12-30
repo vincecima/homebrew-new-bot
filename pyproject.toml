@@ -17,6 +17,7 @@ types-requests = "2.31.0.10"
 
 [tool.poetry.scripts]
 new-formula = 'homebrew_new_bot.post_new_formula:main'
+new-cask = 'homebrew_new_bot.post_new_cask:main'
 
 [build-system]
 requires = ["poetry-core"]
