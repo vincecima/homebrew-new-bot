@@ -7,13 +7,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-requests = "^2.31.0"
-"Mastodon.py" = "^1.8.1"
+requests = "2.31.0"
+"Mastodon.py" = "1.8.1"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.0.277"
-mypy = "^1.4.1"
-types-requests = "^2.31.0.2"
+ruff = "0.1.9"
+mypy = "1.8.0"
+types-requests = "2.31.0.10"
 
 [tool.poetry.scripts]
 new-formula = 'homebrew_new_bot.post_new_formula:main'
