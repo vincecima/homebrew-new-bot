@@ -1,20 +1,22 @@
 [tool.poetry]
 name = "homebrew-new-bot"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Vince Cima <contact@vincecima.com>"]
 readme = "README.md"
-packages = []
 
 [tool.poetry.dependencies]
 python = "^3.11"
 requests = "^2.31.0"
-mastodon-py = "^1.8.1"
+"Mastodon.py" = "^1.8.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.0.277"
 mypy = "^1.4.1"
 types-requests = "^2.31.0.2"
+
+[tool.poetry.scripts]
+new-formula = 'homebrew_new_bot.post_new_formula:main'
 
 [build-system]
 requires = ["poetry-core"]
