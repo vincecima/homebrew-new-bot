@@ -1,12 +1,22 @@
-# https://pypi.org/project/deepdiff/
-
 import logging
+import json
 import os
 import requests
+from dataclasses import dataclass
+from deepdiff import DeepDiff
 from homebrew_new_bot.utils import load_mastodon_config_from_env
 
 HOMEBREW_CASK_JSON_API_URL = "https://formulae.brew.sh/api/cask.json"
 API_SNAPSHOT_PATH = "state/snapshots/cask.json"
+
+
+@dataclass
+class Cask:
+    """Class for all the data needed from a Brew cask."""
+
+    name: str
+    description: str
+    homepage: str
 
 
 def get_metadata_for_all_casks() -> str:
@@ -48,6 +58,29 @@ def set_metadata_snapshot(snapshot: str) -> None:
     return
 
 
+def collect_new_casks(latest_payload: str, snapshot_payload: str) -> list[Cask]:
+    lastest_casks = json.loads(latest_payload)
+    snapshot_casks = json.loads(snapshot_payload)
+    diff = DeepDiff(
+        snapshot_casks, lastest_casks, group_by="token", view="tree", verbose_level=0
+    )
+
+    items_added = diff.get("dictionary_item_added", [])
+    if len(items_added) == 0:
+        return []
+    else:
+        return list(
+            map(
+                lambda item: Cask(
+                    item.t2["name"][0],
+                    item.t2["desc"],  # Might be None
+                    item.t2["homepage"],
+                ),
+                items_added,
+            )
+        )
+
+
 def main() -> None:
     LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
     logging.basicConfig(level=LOG_LEVEL)
@@ -68,11 +101,9 @@ def main() -> None:
     latest_payload = get_metadata_for_all_casks()
     snapshot_payload = get_metadata_snapshot()
 
-    if snapshot_payload is str:
+    if isinstance(snapshot_payload, str):
         logging.info("Existing snapshot found, looking for new casks")
-        # compare latest to existing payload (if existing)
-        # extract information about new formula
-        # schedule new formula posts over the next interval
+        new_casks = collect_new_casks(latest_payload, snapshot_payload)
 
     set_metadata_snapshot(latest_payload)
 
