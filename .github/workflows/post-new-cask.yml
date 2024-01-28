@@ -1,0 +1,41 @@
+name: Post new cask
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: '0 */3 * * *'
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Install rye
+      uses: jaxxstorm/action-install-gh-release@v1.10.0
+      with:
+        repo: mitsuhiko/rye
+    - name: Configure Python with cache
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install dependencies
+      run: rye sync --no-dev
+    - name: Run bot script
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+        MAX_TOOTS_PER_EXECUTION: ${{ vars.MAX_TOOTS_PER_EXECUTION }}
+        MASTODON_API_BASE_URL: ${{ vars.MASTODON_API_BASE_URL }}
+        MASTODON_CLIENT_SECRET: ${{ secrets.MASTODON_CLIENT_SECRET }}
+        MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+      run: rye run new-cask
+    - name: Commit changes to state directory
+      if: ${{ always() }}
+      uses: EndBug/add-and-commit@v9
+      with:
+        add: 'state'
+        message: 'Updated state from last workflow run'
