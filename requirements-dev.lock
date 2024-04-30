@@ -17,14 +17,19 @@ click==8.1.7
     # via sqlite-utils
 click-default-group==1.2.4
     # via sqlite-utils
+feedgen==1.0.0
+    # via homebrew-new-bot
 idna==3.7
     # via requests
+lxml==5.2.1
+    # via feedgen
 mypy==1.10.0
 mypy-extensions==1.0.0
     # via mypy
 pluggy==1.5.0
     # via sqlite-utils
 python-dateutil==2.9.0.post0
+    # via feedgen
     # via sqlite-utils
 requests==2.31.0
     # via homebrew-new-bot
