@@ -25,7 +25,7 @@ def main() -> None:
     table = typing.cast(sqlite_utils.db.Table, db["feed_items"])
     # Get JSON from API endpoint
     # TODO: use latest added_at from DB and HEAD to check if its even worth getting full thing?
-    r = requests.get("https://formulae.brew.sh/api/formula.json")
+    r = requests.get(args.json_api_url)
     last_modified = email.utils.parsedate_to_datetime(r.headers["last-modified"])
     # TODO: is there a shorter syntax to do this?
     packages = list(

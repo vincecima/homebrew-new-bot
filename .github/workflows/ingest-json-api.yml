@@ -20,3 +20,6 @@ jobs:
           version: '0.33.0'
       - name: Install dependencies
         run: rye sync --no-lock
+      - uses: jorgebg/stateful-action@v0.1
+      - name: Upsert data from Formula JSON API
+        run: rye run ingest-json-api formula .state/feed.db 'https://formulae.brew.sh/api/formula.json'
