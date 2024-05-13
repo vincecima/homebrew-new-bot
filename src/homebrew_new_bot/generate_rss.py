@@ -37,6 +37,6 @@ def main() -> None:
         fe.title(row["full_name"])
         fe.link(href=row["homepage"])
         fe.description(row["desc"])
-        fe.guid(f"{row["name"]} - {row["added_at"]}")
+        fe.guid(f"{row["name"]}-{args.feed_namespace}")
 
     fg.rss_file(args.feed_path)
