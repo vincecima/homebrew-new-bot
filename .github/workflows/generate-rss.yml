@@ -1,7 +1,8 @@
 name: Generate RSS feeds for all tracked API sources
 
 on:
-  push:
+  schedule:
+  - cron: '0 10 * * *'
   workflow_dispatch:
 
 jobs:

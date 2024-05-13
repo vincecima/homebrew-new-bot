@@ -1,7 +1,8 @@
 name: Upsert SQLite DB with JSON API updates
 
 on:
-  push:
+  schedule:
+  - cron: '0 9 * * *'
   workflow_dispatch:
 
 jobs:
