@@ -22,7 +22,7 @@ def main() -> None:
 
     # TODO: make tracer optional (along with log level?)
     db = sqlite_utils.Database(args.db_path, tracer=__tracer)
-    table = typing.cast(sqlite_utils.db.Table, db[f"{args.feed_namespace}_items"])
+    table = typing.cast(sqlite_utils.db.Table, db["feed_items"])
     # Get JSON from API endpoint
     # TODO: use latest added_at from DB and HEAD to check if its even worth getting full thing?
     r = requests.get("https://formulae.brew.sh/api/formula.json")
@@ -36,6 +36,7 @@ def main() -> None:
                 "desc": x["desc"],
                 "homepage": x["homepage"],
                 "added_at": last_modified,
+                "namespace": args.feed_namespace,
             },
             r.json(),
         )
@@ -46,8 +47,8 @@ def main() -> None:
         packages,
         # TODO: Confirm that name is the true primary key
         # TODO: How can we generalize this for formula and casks?
-        pk="name",
-        column_order=["name", "full_name", "desc", "homepage", "added_at"],
+        pk=["name", "namespace"],
+        column_order=["name", "full_name", "desc", "homepage", "added_at", "namespace"],
         ignore=True,
     )
     return

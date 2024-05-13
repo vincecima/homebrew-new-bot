@@ -1,20 +1,25 @@
 import argparse
+import datetime
 import feedgen.feed  # type: ignore
 import sqlite_utils
 from .utils import __tracer
 
+FEED_ITEMS_QUERY = """
+SELECT *
+FROM feed_items
+WHERE namespace = ? 
+AND added_at >= ?
+ORDER BY added_at DESC
+LIMIT 100
+"""
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "feed_namespace",
-    )
-    parser.add_argument(
-        "db_path",
-    )
-    parser.add_argument(
-        "feed_path",
-    )
+    parser.add_argument("feed_namespace")
+    parser.add_argument("db_path")
+    parser.add_argument("feed_path")
+    parser.add_argument("start_date", type=datetime.date.fromisoformat)
     args = parser.parse_args()
 
     fg = feedgen.feed.FeedGenerator()
@@ -25,7 +30,7 @@ def main() -> None:
     # TODO: Add optional values
 
     db = sqlite_utils.Database(args.db_path, tracer=__tracer)
-    for row in db.query(f"select * from {args.feed_namespace}_items"):
+    for row in db.query(FEED_ITEMS_QUERY, [args.feed_namespace, args.start_date]):
         fe = fg.add_entry()
         # TODO: What other fields do we want to set?
         fe.id(row["name"])
