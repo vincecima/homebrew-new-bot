@@ -1,0 +1,22 @@
+name: Generate RSS feeds for all tracked API sources
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install rye
+        uses: eifinger/setup-rye@v2
+        with:
+          enable-cache: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: '0.33.0'
+      - name: Install dependencies
+        run: rye sync --no-lock
