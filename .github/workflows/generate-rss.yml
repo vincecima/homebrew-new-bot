@@ -20,3 +20,6 @@ jobs:
           version: '0.33.0'
       - name: Install dependencies
         run: rye sync --no-lock
+      - uses: jorgebg/stateful-action@v0.1
+      - name: Generate RSS feed based on DB
+        run: rye run generate-rss formula .state/feed.db .state/formula.rss 20240501
