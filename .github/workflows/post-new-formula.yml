@@ -3,7 +3,7 @@ name: Post new formula
 on:
   workflow_dispatch:
   schedule:
-  - cron: '22 */12 * * *'
+  - cron: '22 */18 * * *'
 jobs:
   post:
     runs-on: ubuntu-latest
