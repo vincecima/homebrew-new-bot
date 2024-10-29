@@ -1,4 +1,4 @@
-name: Scrape latest data
+name: Scrape latest JSON API data
 
 on:
   push:
@@ -12,14 +12,17 @@ jobs:
     steps:
     - name: Check out this repo
       uses: actions/checkout@v4
-    - name: Fetch latest data
+    - name: Fetch latest formula data
       run: |-
         curl https://formulae.brew.sh/api/formula.json | jq . > formula.json
+    - name: Fetch latest cask data
+      run: |-
+        curl https://formulae.brew.sh/api/cask.json | jq . > cask.json
     - name: Commit and push if it changed
       run: |-
         git config user.name "Automated"
         git config user.email "actions@users.noreply.github.com"
         git add -A
         timestamp=$(date -u)
-        git commit -m "Latest formula data: ${timestamp}" || exit 0
+        git commit -m "Latest JSON API data: ${timestamp}" || exit 0
         git push
