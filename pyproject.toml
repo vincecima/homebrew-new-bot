@@ -6,7 +6,9 @@ authors = [
     { name = "Vince Cima", email = "contact@vincecima.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "sqlite-utils>=3.37",
+]
 
 [project.scripts]
 homebrew-new-bot = "homebrew_new_bot:main"
