@@ -1,10 +1,10 @@
-name: Scrape latest JSON API data
+name: Capture latest JSON API data
 
 on:
   push:
   workflow_dispatch:
   schedule:
-    - cron:  '6,26,46 * * * *'
+    - cron:  '30 12 * * *'
 
 jobs:
   capture:
