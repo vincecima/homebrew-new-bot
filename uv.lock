@@ -39,11 +39,15 @@ name = "homebrew-new-bot"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "click" },
     { name = "sqlite-utils" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "sqlite-utils", specifier = ">=3.37" }]
+requires-dist = [
+    { name = "click", specifier = ">=8.1.7" },
+    { name = "sqlite-utils", specifier = ">=3.37" },
+]
 
 [[package]]
 name = "pluggy"

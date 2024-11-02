@@ -7,11 +7,12 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "click>=8.1.7",
     "sqlite-utils>=3.37",
 ]
 
 [project.scripts]
-homebrew-new-bot = "homebrew_new_bot:main"
+homebrew-new-bot = "homebrew_new_bot:cli"
 
 [build-system]
 requires = ["hatchling"]
