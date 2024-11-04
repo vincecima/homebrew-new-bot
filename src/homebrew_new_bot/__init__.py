@@ -1,9 +1,10 @@
+import email.utils
 import logging
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import StrEnum
 
 import click
+import requests
 from sqlite_utils import Database
 from sqlite_utils.utils import rows_from_file
 
@@ -13,9 +14,11 @@ class PackageType(StrEnum):
     formula = "formula"
 
 
-@dataclass
-class GlobalParameters:
-    verbose: bool
+def package_type_option(fn):
+    click.argument(
+        "package_type", type=click.Choice(PackageType, case_sensitive=False)
+    )(fn)
+    return fn
 
 
 @click.group()
@@ -26,17 +29,24 @@ def cli(verbose):
 
 
 @cli.command()
-def api():
-    pass
+@package_type_option
+def api(package_type):
+    r = requests.get(f"https://formulae.brew.sh/api/{package_type}.json")
+    last_modified = email.utils.parsedate_to_datetime(r.headers["last-modified"])
+    try:
+        with open(f"state/{package_type}/api.json", "w") as file:
+            file.write(r.text)
+    except Exception as ex:
+        return ex
 
 
 @cli.command()
-@click.argument("package_type", type=click.Choice(PackageType, case_sensitive=False))
+@package_type_option
 def database(package_type):
     added_at = datetime.now(timezone.utc)
     packages = None
     try:
-        with open(f"{package_type}.json", "rb") as file:
+        with open(f"state/{package_type}/api.json", "rb") as file:
             rows, format = rows_from_file(file)
             packages = list(
                 map(lambda x: {"id": x["name"], "added_at": added_at, "info": x}, rows)
@@ -52,12 +62,14 @@ def database(package_type):
 
 
 @cli.command()
-def rss():
+@package_type_option
+def rss(package_type):
     pass
 
 
 @cli.command()
-def toot():
+@package_type_option
+def toot(package_type):
     pass
 
 
