@@ -130,10 +130,16 @@ def toot(
     db = Database(f"state/{package_type}/packages.db")
     # TODO: Load data into dataclass
     # TODO: Move query out of inline?
-    packages = db.query(
-        "select id, added_at, info from packages where added_at > :added_at order by added_at ASC",
-        {"added_at": cursor.isoformat()},
+    packages = list(
+        db.query(
+            "select id, added_at, info from packages where added_at > :added_at order by added_at ASC",
+            {"added_at": cursor.isoformat()},
+        )
     )
+
+    if not packages:
+        logging.info(f"No packages found with added_at after {cursor.isoformat()}")
+        return
     # TODO: Log how many pkgs were found and ids
     # TODO: Is this idiomatic Python?
     for i, package in enumerate(packages):
