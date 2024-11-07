@@ -120,7 +120,7 @@ def toot(
     with open(f"state/{package_type}/cursor.txt") as file:
         # TODO: Enforce UTC on read and write
         # TODO: Log starting cusor value
-        cursor = datetime.fromisoformat(file.read().strip())
+        cursor = file.read().strip()
         new_cursor = cursor
 
     with open(f"state/{package_type}/template.txt") as file:
@@ -132,13 +132,13 @@ def toot(
     # TODO: Move query out of inline?
     packages = list(
         db.query(
-            "select id, added_at, info from packages where added_at > :added_at order by added_at ASC",
-            {"added_at": cursor.isoformat()},
+            "select id, added_at, info from packages where added_at || '#' || id > :cursor order by added_at || '#' || id ASC LIMIT :limit",
+            {"cursor": cursor, "limit": max_toots_per_execution},
         )
     )
 
     if not packages:
-        logging.info(f"No packages found with added_at after {cursor.isoformat()}")
+        logging.info(f"No packages found with cursor after {cursor}")
         return
     # TODO: Log how many pkgs were found and ids
     # TODO: Is this idiomatic Python?
@@ -154,10 +154,10 @@ def toot(
             template_output = template.format(**package_info)
             # TOOD: Handle failure (backoff cursor)
             mastodon.status_post(status=template_output)
-            new_cursor = datetime.fromisoformat(package["added_at"])
+            new_cursor = f"{package["added_at"]}#{package["id"]}"
 
     with open(f"state/{package_type}/cursor.txt", "w") as file:
-        # TODO: Enforce UTC on read and write
-        # TODO: Do atomic write and replace
-        # TODO: Log value before writing
-        file.write(new_cursor.isoformat())
+            # TODO: Enforce UTC on read and write
+            # TODO: Do atomic write and replace
+            # TODO: Log value before writing
+        file.write(new_cursor)
