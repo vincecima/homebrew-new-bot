@@ -118,9 +118,8 @@ def toot(
     )
 
     with open(f"state/{package_type}/cursor.txt") as file:
-        # TODO: Enforce UTC on read and write
         # TODO: Log starting cusor value
-        cursor = file.read().strip()
+        cursor = int(file.read().strip())
         new_cursor = cursor
 
     with open(f"state/{package_type}/template.txt") as file:
@@ -132,7 +131,7 @@ def toot(
     # TODO: Move query out of inline?
     packages = list(
         db.query(
-            "select id, added_at, info from packages where added_at || '#' || id > :cursor order by added_at || '#' || id ASC LIMIT :limit",
+            "select id, added_at, info, ROWID from packages where ROWID > :cursor order by ROWID ASC LIMIT :limit",
             {"cursor": cursor, "limit": max_toots_per_execution},
         )
     )
@@ -152,12 +151,12 @@ def toot(
             # TODO: Post to Mastodon
             # TODO: Use scheduled posts to spread out
             template_output = template.format(**package_info)
+            print(template_output)
             # TOOD: Handle failure (backoff cursor)
             mastodon.status_post(status=template_output)
-            new_cursor = f"{package["added_at"]}#{package["id"]}"
+            new_cursor = package["rowid"]
 
     with open(f"state/{package_type}/cursor.txt", "w") as file:
-            # TODO: Enforce UTC on read and write
-            # TODO: Do atomic write and replace
-            # TODO: Log value before writing
-        file.write(new_cursor)
+        # TODO: Do atomic write and replace
+        # TODO: Log value before writing
+        file.write(str(new_cursor))
