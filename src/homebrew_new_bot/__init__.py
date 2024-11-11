@@ -147,11 +147,7 @@ def toot(
         else:
             package_info = json.loads(package["info"])
             # TODO: Remove dictionary reference
-            # TODO: Use info to hydrate template
-            # TODO: Post to Mastodon
-            # TODO: Use scheduled posts to spread out
             template_output = template.format(**package_info)
-            print(template_output)
             # TOOD: Handle failure (backoff cursor)
             mastodon.status_post(status=template_output)
             new_cursor = package["rowid"]
