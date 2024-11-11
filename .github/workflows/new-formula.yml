@@ -1,13 +1,12 @@
 name: Capture, update and post latest formula
 
 on:
-  push:
   workflow_dispatch:
   schedule:
     - cron:  '30 12 * * *'
 
 jobs:
-  capture:
+  capture-update-post:
     runs-on: ubuntu-latest
     steps:
     - name: Check out this repo
