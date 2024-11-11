@@ -1,23 +1,21 @@
-[tool.poetry]
+[project]
 name = "homebrew-new-bot"
-version = "0.2.0"
-description = ""
-authors = ["Vince Cima <contact@vincecima.com>"]
-readme = "README.md"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Vince Cima", email = "contact@vincecima.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.1.7",
+    "mastodon-py>=1.8.1",
+    "requests>=2.32.3",
+    "sqlite-utils>=3.37",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-requests = "^2.31.0"
-"Mastodon.py" = "^1.8.1"
-
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.0.277"
-mypy = "^1.4.1"
-types-requests = "^2.31.0.2"
-
-[tool.poetry.scripts]
-new-formula = 'homebrew_new_bot.post_new_formula:main'
+[project.scripts]
+homebrew-new-bot = "homebrew_new_bot:cli"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
