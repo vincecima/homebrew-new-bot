@@ -131,8 +131,8 @@ def toot(
     # TODO: Move query out of inline?
     packages = list(
         db.query(
-            "select id, added_at, info, ROWID from packages where ROWID > :cursor order by ROWID ASC LIMIT :limit",
-            {"cursor": cursor, "limit": max_toots_per_execution},
+            "select id, added_at, info, ROWID from packages where ROWID > :cursor order by ROWID ASC",
+            {"cursor": cursor},
         )
     )
 
