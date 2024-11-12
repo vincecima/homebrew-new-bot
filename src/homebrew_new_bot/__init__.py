@@ -156,6 +156,5 @@ def toot(
 
     with open(f"state/{package_type}/cursor.txt", "w") as file:
         # TODO: Do atomic write and replace
-        # TODO: Log value before writing
         logging.info(f"New cursor value: {new_cursor}")
         file.write(str(new_cursor))
