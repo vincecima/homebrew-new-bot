@@ -118,8 +118,8 @@ def toot(
     )
 
     with open(f"state/{package_type}/cursor.txt") as file:
-        # TODO: Log starting cusor value
         cursor = int(file.read().strip())
+        logging.info(f"Existing cursor value: {cursor}")
         new_cursor = cursor
 
     with open(f"state/{package_type}/template.txt") as file:
@@ -139,7 +139,9 @@ def toot(
     if not packages:
         logging.info(f"No packages found with cursor after {cursor}")
         return
-    # TODO: Log how many pkgs were found and ids
+    logging.info(
+        f"Found {len(packages)} packages to be posted, {packages[0]['id']}...{packages[-1]['id']}"
+    )
     # TODO: Is this idiomatic Python?
     for i, package in enumerate(packages):
         if (i) >= max_toots_per_execution:
@@ -155,4 +157,5 @@ def toot(
     with open(f"state/{package_type}/cursor.txt", "w") as file:
         # TODO: Do atomic write and replace
         # TODO: Log value before writing
+        logging.info(f"New cursor value: {new_cursor}")
         file.write(str(new_cursor))
