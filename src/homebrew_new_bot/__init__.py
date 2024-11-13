@@ -1,3 +1,4 @@
+import gzip
 import json
 import logging
 from datetime import datetime, timezone
@@ -36,7 +37,7 @@ def api(package_type):
     # TODO: use last-modified for added_at and to short circuit full API request (via HEAD)
     # last_modified = email.utils.parsedate_to_datetime(r.headers["last-modified"])
     try:
-        with open(f"state/{package_type}/api.json", "w") as file:
+        with gzip.open(f"state/{package_type}/api.json.gz", "wt") as file:
             file.write(r.text)
     except Exception as ex:
         return ex
@@ -47,7 +48,7 @@ def api(package_type):
 def database(package_type):
     added_at = datetime.now(timezone.utc)
     try:
-        with open(f"state/{package_type}/api.json", "rb") as file:
+        with gzip.open(f"state/{package_type}/api.json.gz", "rb") as file:
             rows, format = rows_from_file(file)
             packages = list(
                 map(
@@ -66,7 +67,7 @@ def database(package_type):
     db["packages"].create(
         {"id": str, "added_at": datetime, "info": str}, pk="id", if_not_exists=True
     )
-    db["packages"].insert_all(packages, ignore=True)
+    result = db["packages"].insert_all(packages, ignore=True)
 
 
 @cli.command()
