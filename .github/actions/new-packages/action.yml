@@ -31,9 +31,10 @@ runs:
       shell: bash
       run: |-
         uv run homebrew-new-bot api ${{ inputs.package_type }}
-    # - name: Update package database
-    #   run: |-
-    #     uv run homebrew-new-bot database ${{ inputs.package_type }}
+    - name: Update package database
+      shell: bash
+      run: |-
+        uv run homebrew-new-bot database ${{ inputs.package_type }}
     # - name: Post new formula
     #   run: |-
     #     uv run homebrew-new-bot toot --max_toots_per_execution=${{ inputs.max_toots_per_execution }} --mastodon_api_base_url=${{ inputs.mastodon_api_base_url }} --mastodon_access_token=${{ inputs.mastodon_access_token }}  --mastodon_client_secret=${{ inputs.mastodon_client_secret }} ${{ inputs.package_type }}
