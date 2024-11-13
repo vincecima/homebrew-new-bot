@@ -1,0 +1,48 @@
+name: "New Packages"
+description: "Capture the API output, update local state and post new packages to destinations"
+inputs:
+  github_token:
+    description: "GitHub App installation access token"
+    required: true
+  mastodon_access_token:
+    description: "Client access token for posting"
+    required: true
+  mastodon_api_base_url:
+    description: "The API endpoint for posting toots"
+    required: true
+  mastodon_client_secret:
+    description: "Client secret for posting"
+    required: true
+  max_toots_per_execution:
+    description: "The number of toots to output in a single execute"
+    required: true
+  package_type:
+    description: "The type of package, must have a matching state directory"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: astral-sh/setup-uv@v2
+      with:
+        version: "0.5.0"
+        enable-cache: true
+        github-token: ${{ inputs.GITHUB_TOKEN }}
+    - name: Fetch latest formula data
+      shell: bash
+      run: |-
+        uv run homebrew-new-bot api ${{ inputs.package_type }}
+    # - name: Update package database
+    #   run: |-
+    #     uv run homebrew-new-bot database ${{ inputs.package_type }}
+    # - name: Post new formula
+    #   run: |-
+    #     uv run homebrew-new-bot toot --max_toots_per_execution=${{ inputs.max_toots_per_execution }} --mastodon_api_base_url=${{ inputs.mastodon_api_base_url }} --mastodon_access_token=${{ inputs.mastodon_access_token }}  --mastodon_client_secret=${{ inputs.mastodon_client_secret }} ${{ inputs.package_type }}
+    - name: Commit and push if it changed
+      shell: bash
+      run: |-
+        git config user.name "Automated"
+        git config user.email "actions@users.noreply.github.com"
+        git add -A
+        timestamp=$(date -u)
+        git commit -m "Latest state: ${timestamp}" || exit 0
+        git push
