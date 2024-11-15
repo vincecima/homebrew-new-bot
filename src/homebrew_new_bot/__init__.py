@@ -119,51 +119,50 @@ def toot(
     mastodon_client_secret,
     max_toots_per_execution,
 ):
-    pass
-    # mastodon = Mastodon(
-    #     api_base_url=mastodon_api_base_url,
-    #     access_token=mastodon_access_token,
-    #     client_secret=mastodon_client_secret,
-    # )
+    mastodon = Mastodon(
+        api_base_url=mastodon_api_base_url,
+        access_token=mastodon_access_token,
+        client_secret=mastodon_client_secret,
+    )
 
-    # with open(f"state/{package_type}/cursor.txt") as file:
-    #     cursor = int(file.read().strip())
-    #     logging.info(f"Existing cursor value: {cursor}")
-    #     new_cursor = cursor
+    with open(f"state/{package_type}/cursor.txt") as file:
+        cursor = int(file.read().strip())
+        logging.info(f"Existing cursor value: {cursor}")
+        new_cursor = cursor
 
-    # with open(f"state/{package_type}/template.txt") as file:
-    #     template = file.read()
+    with open(f"state/{package_type}/template.txt") as file:
+        template = file.read()
 
-    # # TODO: Factor out loading from correct state folder
-    # db = Database(f"state/{package_type}/packages.db")
-    # # TODO: Load data into dataclass
-    # # TODO: Move query out of inline?
-    # packages = list(
-    #     db.query(
-    #         "select id, added_at, info, ROWID from packages where ROWID > :cursor order by ROWID ASC",
-    #         {"cursor": cursor},
-    #     )
-    # )
+    # TODO: Factor out loading from correct state folder
+    db = Database(f"state/{package_type}/packages.db")
+    # TODO: Load data into dataclass
+    # TODO: Move query out of inline?
+    packages = list(
+        db.query(
+            "select id, added_at, info, ROWID from packages where ROWID > :cursor order by ROWID ASC",
+            {"cursor": cursor},
+        )
+    )
 
-    # if not packages:
-    #     logging.info(f"No packages found with cursor after {cursor}")
-    #     return
-    # logging.info(
-    #     f"Found {len(packages)} packages to be posted, {packages[0]['id']}...{packages[-1]['id']}"
-    # )
-    # # TODO: Is this idiomatic Python?
-    # for i, package in enumerate(packages):
-    #     if (i) >= max_toots_per_execution:
-    #         break
-    #     else:
-    #         package_info = json.loads(package["info"])
-    #         # TODO: Remove dictionary reference
-    #         template_output = template.format(**package_info)
-    #         # TOOD: Handle failure (backoff cursor)
-    #         mastodon.status_post(status=template_output)
-    #         new_cursor = package["rowid"]
+    if not packages:
+        logging.info(f"No packages found with cursor after {cursor}")
+        return
+    logging.info(
+        f"Found {len(packages)} packages to be posted, {packages[0]['id']}...{packages[-1]['id']}"
+    )
+    # TODO: Is this idiomatic Python?
+    for i, package in enumerate(packages):
+        if (i) >= max_toots_per_execution:
+            break
+        else:
+            package_info = json.loads(package["info"])
+            # TODO: Remove dictionary reference
+            template_output = template.format(**package_info)
+            # TOOD: Handle failure (backoff cursor)
+            mastodon.status_post(status=template_output)
+            new_cursor = package["rowid"]
 
-    # with open(f"state/{package_type}/cursor.txt", "w") as file:
-    #     # TODO: Do atomic write and replace
-    #     logging.info(f"New cursor value: {new_cursor}")
-    #     file.write(str(new_cursor))
+    with open(f"state/{package_type}/cursor.txt", "w") as file:
+        # TODO: Do atomic write and replace
+        logging.info(f"New cursor value: {new_cursor}")
+        file.write(str(new_cursor))
