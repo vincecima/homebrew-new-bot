@@ -1,0 +1,7 @@
+🛢️ {full_token} 🛢️
+
+{desc}
+
+🔗 {homepage}
+
+#homebrew #newpkg #macos #cask
