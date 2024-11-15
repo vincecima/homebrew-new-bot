@@ -23,6 +23,13 @@ def package_type_option(fn):
     return fn
 
 
+def extract_id_value(package_type, package_info):
+    if package_type is PackageType.cask:
+        return package_info["full_token"]
+    else:
+        return package_info["name"]
+
+
 @click.group()
 @click.version_option("1.0")
 @click.option("--verbose", "-v", is_flag=True, help="Enables verbose mode.")
@@ -53,7 +60,7 @@ def database(package_type):
             packages = list(
                 map(
                     lambda x: {
-                        "id": x["name"],
+                        "id": extract_id_value(package_type, x),
                         "added_at": added_at.isoformat(),
                         "info": x,
                     },
@@ -67,7 +74,7 @@ def database(package_type):
     db["packages"].create(
         {"id": str, "added_at": datetime, "info": str}, pk="id", if_not_exists=True
     )
-    result = db["packages"].insert_all(packages, ignore=True)
+    db["packages"].insert_all(packages, ignore=True)
 
 
 @cli.command()
