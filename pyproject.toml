@@ -19,3 +19,8 @@ homebrew-new-bot = "homebrew_new_bot:cli"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.7.4",
+]
