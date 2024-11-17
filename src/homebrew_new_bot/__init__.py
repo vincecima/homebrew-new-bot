@@ -1,13 +1,16 @@
 import gzip
 import json
 import logging
+from collections.abc import Callable
 from datetime import datetime, timezone
 from enum import StrEnum
+from typing import Any, BinaryIO, cast
 
 import click
 import requests
-from mastodon import Mastodon
+from mastodon import Mastodon  # type: ignore
 from sqlite_utils import Database
+from sqlite_utils.db import Table
 from sqlite_utils.utils import rows_from_file
 
 
@@ -16,30 +19,34 @@ class PackageType(StrEnum):
     formula = "formula"
 
 
-def package_type_option(fn):
+def package_type_option(
+    fn: Callable[..., None],
+) -> Callable[..., None]:
     click.argument(
-        "package_type", type=click.Choice(PackageType, case_sensitive=False)
+        "package_type", type=click.Choice(list(PackageType), case_sensitive=False)
     )(fn)
     return fn
 
 
-def extract_id_value(package_type, package_info):
+def extract_id_value(package_type: PackageType, package_info: dict[str, Any]) -> str:
+    id_value: str
     if package_type is PackageType.cask:
-        return package_info["full_token"]
+        id_value = package_info["full_token"]
     else:
-        return package_info["name"]
+        id_value = package_info["name"]
+    return id_value
 
 
 @click.group()
 @click.version_option("1.0")
 @click.option("--verbose", "-v", is_flag=True, help="Enables verbose mode.")
-def cli(verbose):
+def cli(verbose: bool) -> None:
     logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
 
 
 @cli.command()
 @package_type_option
-def api(package_type):
+def api(package_type: PackageType) -> None:
     r = requests.get(f"https://formulae.brew.sh/api/{package_type}.json")
     # TODO: use last-modified for added_at and to short circuit full API request (via HEAD)
     # last_modified = email.utils.parsedate_to_datetime(r.headers["last-modified"])
@@ -47,16 +54,17 @@ def api(package_type):
         with gzip.open(f"state/{package_type}/api.json.gz", "wt") as file:
             file.write(r.text)
     except Exception as ex:
-        return ex
+        raise ex
 
 
 @cli.command()
 @package_type_option
-def database(package_type):
+def database(package_type: PackageType) -> None:
     added_at = datetime.now(timezone.utc)
     try:
         with gzip.open(f"state/{package_type}/api.json.gz", "rb") as file:
-            rows, format = rows_from_file(file)
+            # NOTE: typing.IO and io.BaseIO are incompatible https://github.com/python/typeshed/issues/6077
+            rows, format = rows_from_file(cast(BinaryIO, file))
             packages = list(
                 map(
                     lambda x: {
@@ -68,22 +76,24 @@ def database(package_type):
                 )
             )
     except Exception as ex:
-        return ex
+        raise ex
 
     db = Database(f"state/{package_type}/packages.db")
-    db["packages"].create(
+    packages_table = cast(Table, db.table("packages")).create(
         {"id": str, "added_at": datetime, "info": str}, pk="id", if_not_exists=True
     )
-    db["packages"].insert_all(packages, ignore=True)
+    packages_table.insert_all(packages, ignore=True)
 
 
 @cli.command()
 @package_type_option
-def rss(package_type):
+def rss(package_type: PackageType) -> None:
     pass
 
 
-def validate_mastodon_config(ctx, param, value):
+def validate_mastodon_config(
+    ctx: click.Context, param: click.ParamType, value: str
+) -> str:
     if value is None:
         raise click.BadParameter("required")
     else:
@@ -113,12 +123,12 @@ def validate_mastodon_config(ctx, param, value):
 @click.option("--max_toots_per_execution", default=1)
 # TODO: Break this method up with helpers
 def toot(
-    package_type,
-    mastodon_api_base_url,
-    mastodon_access_token,
-    mastodon_client_secret,
-    max_toots_per_execution,
-):
+    package_type: PackageType,
+    mastodon_api_base_url: str,
+    mastodon_access_token: str,
+    mastodon_client_secret: str,
+    max_toots_per_execution: int,
+) -> None:
     mastodon = Mastodon(
         api_base_url=mastodon_api_base_url,
         access_token=mastodon_access_token,
