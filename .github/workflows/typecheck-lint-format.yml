@@ -1,9 +1,9 @@
-name: Lint and format
+name: Typecheck and lint and format
 
 on: push
 
 jobs:
-  lint-and-format:
+  typecheck-lint-format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,8 +15,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install dependencies
         run: |
-          uv tool install ruff
+          uv sync
+      - name: Run typecheck
+        run: |
+          uv run mypy --strict src/homebrew_new_bot
       - name: Run linter
+        if: always()
         run: |
           uv run ruff check --output-format=github .
       - name: Run formatter
