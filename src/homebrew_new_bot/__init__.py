@@ -1,4 +1,3 @@
-import gzip
 import json
 import logging
 from collections.abc import Callable
@@ -51,7 +50,7 @@ def api(package_type: PackageType) -> None:
     # TODO: use last-modified for added_at and to short circuit full API request (via HEAD)
     # last_modified = email.utils.parsedate_to_datetime(r.headers["last-modified"])
     try:
-        with gzip.open(f"state/{package_type}/api.json.gz", "wt") as file:
+        with open(f"state/{package_type}/api.json", "w") as file:
             file.write(r.text)
     except Exception as ex:
         raise ex
@@ -88,7 +87,7 @@ def restore(package_type: PackageType) -> None:
 def update(package_type: PackageType) -> None:
     added_at = datetime.now(timezone.utc)
     try:
-        with gzip.open(f"state/{package_type}/api.json.gz", "rb") as file:
+        with open(f"state/{package_type}/api.json") as file:
             # NOTE: typing.IO and io.BaseIO are incompatible https://github.com/python/typeshed/issues/6077
             rows, format = rows_from_file(cast(BinaryIO, file))
             packages = list(
