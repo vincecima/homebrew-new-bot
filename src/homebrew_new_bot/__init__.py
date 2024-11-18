@@ -75,6 +75,16 @@ def dump(package_type: PackageType) -> None:
 
 @database.command()
 @package_type_option
+def restore(package_type: PackageType) -> None:
+    # TODO: Can we just stream directly to db?
+    with open(f"state/{package_type}/packages.db.sql") as file:
+        full_sql = file.read()
+    db = Database(f"state/{package_type}/packages.db")
+    db.executescript(full_sql)
+
+
+@database.command()
+@package_type_option
 def update(package_type: PackageType) -> None:
     added_at = datetime.now(timezone.utc)
     try:
