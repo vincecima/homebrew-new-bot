@@ -57,9 +57,35 @@ def api(package_type: PackageType) -> None:
         raise ex
 
 
-@cli.command()
+# NOTE: Create database parent for subcommands
+@cli.group()
+def database() -> None:
+    return
+
+
+@database.command()
 @package_type_option
-def database(package_type: PackageType) -> None:
+def dump(package_type: PackageType) -> None:
+    db = Database(f"state/{package_type}/packages.db")
+    # TODO: Can we just stream directly to file?
+    full_sql = "".join(db.iterdump())
+    with open(f"state/{package_type}/packages.db.sql", "w") as file:
+        file.write(str(full_sql))
+
+
+@database.command()
+@package_type_option
+def restore(package_type: PackageType) -> None:
+    # TODO: Can we just stream directly to db?
+    with open(f"state/{package_type}/packages.db.sql") as file:
+        full_sql = file.read()
+    db = Database(f"state/{package_type}/packages.db")
+    db.executescript(full_sql)
+
+
+@database.command()
+@package_type_option
+def update(package_type: PackageType) -> None:
     added_at = datetime.now(timezone.utc)
     try:
         with gzip.open(f"state/{package_type}/api.json.gz", "rb") as file:
@@ -149,7 +175,7 @@ def toot(
     # TODO: Move query out of inline?
     packages = list(
         db.query(
-            "select id, added_at, info, ROWID from packages where ROWID > :cursor order by ROWID ASC",
+            "select id, added_at, info, insert_order from packages where insert_order > :cursor order by insert_order ASC",
             {"cursor": cursor},
         )
     )
@@ -170,7 +196,7 @@ def toot(
             template_output = template.format(**package_info)
             # TOOD: Handle failure (backoff cursor)
             mastodon.status_post(status=template_output)
-            new_cursor = package["rowid"]
+            new_cursor = package["insert_order"]
 
     with open(f"state/{package_type}/cursor.txt", "w") as file:
         # TODO: Do atomic write and replace

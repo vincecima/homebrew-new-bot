@@ -1,15 +1,5 @@
-# Local .terraform directories
-**/.terraform/*
-
-# .tfstate backup files
-*.tfstate.*
-
-# Ignore CLI configuration files
-.terraformrc
-terraform.rc
-
-# tfvars files with values
-**/terraform.tfvars
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
+
+# Temporary state related files
+state/**/packages.db

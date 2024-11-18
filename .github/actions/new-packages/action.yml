@@ -34,7 +34,9 @@ runs:
     - name: Update package database
       shell: bash
       run: |-
-        uv run homebrew-new-bot database ${{ inputs.package_type }}
+        uv run homebrew-new-bot database restore ${{ inputs.package_type }}
+        uv run homebrew-new-bot database update ${{ inputs.package_type }}
+        uv run homebrew-new-bot database dump ${{ inputs.package_type }}
     - name: Post new formula
       shell: bash
       run: |-
