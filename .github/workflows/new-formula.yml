@@ -21,6 +21,7 @@ jobs:
         uv run homebrew-new-bot api formula
     - name: Update package database
       run: |-
+        uv run homebrew-new-bot database restore formula
         uv run homebrew-new-bot database update formula
         uv run homebrew-new-bot database dump formula
     - name: Post new formula
