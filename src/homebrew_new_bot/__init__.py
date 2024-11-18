@@ -175,7 +175,7 @@ def toot(
     # TODO: Move query out of inline?
     packages = list(
         db.query(
-            "select id, added_at, info, ROWID from packages where ROWID > :cursor order by ROWID ASC",
+            "select id, added_at, info, insert_order from packages where insert_order > :cursor order by insert_order ASC",
             {"cursor": cursor},
         )
     )
@@ -196,7 +196,7 @@ def toot(
             template_output = template.format(**package_info)
             # TOOD: Handle failure (backoff cursor)
             mastodon.status_post(status=template_output)
-            new_cursor = package["rowid"]
+            new_cursor = package["insert_order"]
 
     with open(f"state/{package_type}/cursor.txt", "w") as file:
         # TODO: Do atomic write and replace
