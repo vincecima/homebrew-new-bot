@@ -21,7 +21,7 @@ jobs:
         uv run homebrew-new-bot api formula
     - name: Update package database
       run: |-
-        uv run homebrew-new-bot database formula
+        uv run homebrew-new-bot database update formula
     - name: Post new formula
       run: |-
         uv run homebrew-new-bot toot --max_toots_per_execution=${{ vars.MAX_TOOTS_PER_EXECUTION }} --mastodon_api_base_url=${{ vars.MASTODON_API_BASE_URL }} --mastodon_access_token=${{ secrets.MASTODON_ACCESS_TOKEN }}  --mastodon_client_secret=${{ secrets.MASTODON_CLIENT_SECRET }} formula

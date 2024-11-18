@@ -57,9 +57,15 @@ def api(package_type: PackageType) -> None:
         raise ex
 
 
-@cli.command()
+# NOTE: Create database parent for subcommands
+@cli.group()
+def database() -> None:
+    pass
+
+
+@database.command()
 @package_type_option
-def database(package_type: PackageType) -> None:
+def update(package_type: PackageType) -> None:
     added_at = datetime.now(timezone.utc)
     try:
         with gzip.open(f"state/{package_type}/api.json.gz", "rb") as file:
