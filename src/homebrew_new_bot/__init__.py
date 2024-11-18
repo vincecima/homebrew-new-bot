@@ -60,7 +60,17 @@ def api(package_type: PackageType) -> None:
 # NOTE: Create database parent for subcommands
 @cli.group()
 def database() -> None:
-    pass
+    return
+
+
+@database.command()
+@package_type_option
+def dump(package_type: PackageType) -> None:
+    db = Database(f"state/{package_type}/packages.db")
+    # TODO: Can we just stream directly to file?
+    full_sql = "".join(db.iterdump())
+    with open(f"state/{package_type}/packages.db.sql", "w") as file:
+        file.write(str(full_sql))
 
 
 @database.command()
