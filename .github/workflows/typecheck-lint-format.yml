@@ -6,25 +6,25 @@ jobs:
   typecheck-lint-format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v2
-        with:
-          version: "0.5.0"
-          enable-cache: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install dependencies
-        run: |
-          uv sync
-      - name: Run typecheck
-        run: |
-          uv run mypy --strict src/homebrew_new_bot
-      - name: Run linter
-        if: always()
-        run: |
-          uv run ruff check --output-format=github .
-      - name: Run formatter
-        if: always()
-        run: |
-          uv run ruff check --output-format=github --select I .
-          uv run ruff format --diff .
+    - uses: actions/checkout@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "0.5.0"
+        enable-cache: true
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Install dependencies
+      run: |
+        uv sync
+    - name: Run typecheck
+      run: |
+        uv run mypy --strict src/homebrew_new_bot
+    - name: Run linter
+      if: always()
+      run: |
+        uv run ruff check --output-format=github .
+    - name: Run formatter
+      if: always()
+      run: |
+        uv run ruff check --output-format=github --select I .
+        uv run ruff format --diff .

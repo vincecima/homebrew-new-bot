@@ -3,7 +3,7 @@ name: Capture, update and post latest casks
 on:
   workflow_dispatch:
   schedule:
-    - cron:  '30 18 * * *'
+  - cron: '30 18 * * *'
 
 jobs:
   capture-update-post:
