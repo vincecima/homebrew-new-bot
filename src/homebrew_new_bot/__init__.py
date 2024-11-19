@@ -3,7 +3,7 @@ import logging
 from collections.abc import Callable
 from datetime import datetime, timezone
 from enum import StrEnum
-from typing import Any, BinaryIO, cast
+from typing import Any, cast
 
 import click
 import requests
@@ -87,9 +87,9 @@ def restore(package_type: PackageType) -> None:
 def update(package_type: PackageType) -> None:
     added_at = datetime.now(timezone.utc)
     try:
-        with open(f"state/{package_type}/api.json") as file:
+        with open(f"state/{package_type}/api.json", "rb") as file:
             # NOTE: typing.IO and io.BaseIO are incompatible https://github.com/python/typeshed/issues/6077
-            rows, format = rows_from_file(cast(BinaryIO, file))
+            rows, format = rows_from_file(file)
             packages = list(
                 map(
                     lambda x: {
