@@ -1,7 +1,0 @@
-🍻 {name} 🍻
-
-{desc}
-
-🔗 {homepage}
-
-#homebrew #newpkg #macos #linux #formula
