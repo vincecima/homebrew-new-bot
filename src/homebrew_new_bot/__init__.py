@@ -7,6 +7,7 @@ from typing import Any, cast
 
 import click
 import requests
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from mastodon import Mastodon  # type: ignore
 from sqlite_utils import Database
 from sqlite_utils.db import Table
@@ -165,9 +166,6 @@ def toot(
         logging.info(f"Existing cursor value: {cursor}")
         new_cursor = cursor
 
-    with open(f"state/{package_type}/template.txt") as file:
-        template = file.read()
-
     # TODO: Factor out loading from correct state folder
     db = Database(f"state/{package_type}/packages.db")
     # TODO: Load data into dataclass
@@ -185,6 +183,12 @@ def toot(
     logging.info(
         f"Found {len(packages)} packages to be posted, {packages[0]['id']}...{packages[-1]['id']}"
     )
+    template_env = Environment(
+        loader=FileSystemLoader(f"state/{package_type}"),
+        autoescape=select_autoescape(),
+        trim_blocks=True,
+    )
+    template = template_env.get_template("template.j2")
     # TODO: Is this idiomatic Python?
     for i, package in enumerate(packages):
         if (i) >= max_toots_per_execution:
@@ -192,8 +196,8 @@ def toot(
         else:
             package_info = json.loads(package["info"])
             # TODO: Remove dictionary reference
-            template_output = template.format(**package_info)
-            # TOOD: Handle failure (backoff cursor)
+            template_output = template.render(**package_info)
+            # TODO: Handle failure (backoff cursor)
             mastodon.status_post(status=template_output)
             new_cursor = package["insert_order"]
 
