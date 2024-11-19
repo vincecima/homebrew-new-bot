@@ -161,7 +161,7 @@ def toot(
         client_secret=mastodon_client_secret,
     )
 
-    with open(f"state/{package_type}/cursor.txt") as file:
+    with open(f"state/{package_type}/mastodon.cursor") as file:
         cursor = int(file.read().strip())
         logging.info(f"Existing cursor value: {cursor}")
         new_cursor = cursor
@@ -201,7 +201,7 @@ def toot(
             mastodon.status_post(status=template_output)
             new_cursor = package["insert_order"]
 
-    with open(f"state/{package_type}/cursor.txt", "w") as file:
+    with open(f"state/{package_type}/mastodon.cursor", "w") as file:
         # TODO: Do atomic write and replace
         logging.info(f"New cursor value: {new_cursor}")
         file.write(str(new_cursor))
