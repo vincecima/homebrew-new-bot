@@ -7,6 +7,7 @@ from typing import Any, cast
 
 import click
 import requests
+from atproto import Client  # type: ignore
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from mastodon import Mastodon  # type: ignore
 from sqlite_utils import Database
@@ -202,6 +203,84 @@ def toot(
             new_cursor = package["insert_order"]
 
     with open(f"state/{package_type}/mastodon.cursor", "w") as file:
+        # TODO: Do atomic write and replace
+        logging.info(f"New cursor value: {new_cursor}")
+        file.write(str(new_cursor))
+
+
+def validate_bsky_config(ctx: click.Context, param: click.ParamType, value: str) -> str:
+    if value is None:
+        raise click.BadParameter("required")
+    else:
+        return value
+
+
+@cli.command()
+@package_type_option
+@click.option(
+    "--bsky_username",
+    envvar="BSKY_USERNAME",
+    show_envvar=True,
+    callback=validate_bsky_config,
+)
+@click.option(
+    "--bsky_password",
+    envvar="BSKY_PASSWORD",
+    show_envvar=True,
+    callback=validate_bsky_config,
+)
+@click.option("--max_skeets_per_execution", default=1)
+# TODO: Break this method up with helpers
+def skeet(
+    package_type: PackageType,
+    bsky_username: str,
+    bsky_password: str,
+    max_skeets_per_execution: int,
+) -> None:
+    bsky = Client()
+    bsky.login(bsky_username, bsky_password)
+
+    with open(f"state/{package_type}/bsky.cursor") as file:
+        cursor = int(file.read().strip())
+        logging.info(f"Existing cursor value: {cursor}")
+        new_cursor = cursor
+
+    # TODO: Factor out loading from correct state folder
+    db = Database(f"state/{package_type}/packages.db")
+    # TODO: Load data into dataclass
+    # TODO: Move query out of inline?
+    packages = list(
+        db.query(
+            "select id, added_at, info, insert_order from packages where insert_order > :cursor order by insert_order ASC",
+            {"cursor": cursor},
+        )
+    )
+
+    if not packages:
+        logging.info(f"No packages found with cursor after {cursor}")
+        return
+    logging.info(
+        f"Found {len(packages)} packages to be posted, {packages[0]['id']}...{packages[-1]['id']}"
+    )
+    template_env = Environment(
+        loader=FileSystemLoader(f"state/{package_type}"),
+        autoescape=select_autoescape(),
+        trim_blocks=True,
+    )
+    template = template_env.get_template("template.j2")
+    # TODO: Is this idiomatic Python?
+    for i, package in enumerate(packages):
+        if (i) >= max_skeets_per_execution:
+            break
+        else:
+            package_info = json.loads(package["info"])
+            # TODO: Remove dictionary reference
+            template_output = template.render(**package_info)
+            # TODO: Handle failure (backoff cursor)
+            bsky.send_post(template_output)
+            new_cursor = package["insert_order"]
+
+    with open(f"state/{package_type}/bsky.cursor", "w") as file:
         # TODO: Do atomic write and replace
         logging.info(f"New cursor value: {new_cursor}")
         file.write(str(new_cursor))
