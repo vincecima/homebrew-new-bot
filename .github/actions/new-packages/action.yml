@@ -41,7 +41,6 @@ runs:
     shell: bash
     run: |-
       uv run homebrew-new-bot toot --max_toots_per_execution=${{ inputs.max_toots_per_execution }} --mastodon_api_base_url=${{ inputs.mastodon_api_base_url }} --mastodon_access_token=${{ inputs.mastodon_access_token }}  --mastodon_client_secret=${{ inputs.mastodon_client_secret }} ${{ inputs.package_type }}
-      uv run homebrew-new-bot skeet --max_skeets_per_execution=${{ inputs.max_skeets_per_execution }} --bsky_username=${{ inputs.bsky_username }} --bsky_password=${{ inputs.bsky_password }} ${{ inputs.package_type }}
   - name: Commit and push if it changed
     shell: bash
     run: |-
