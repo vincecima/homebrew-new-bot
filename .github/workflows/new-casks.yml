@@ -1,25 +1,23 @@
-name: Capture, update and post latest casks
-
-on:
-  workflow_dispatch:
+name: 'Capture, update and post latest casks'
+'on':
+  workflow_dispatch: null
   schedule:
-  - cron: '30 18 * * *'
-
+    - cron: 30 18 * * *
 jobs:
   capture-update-post:
     runs-on: ubuntu-latest
     steps:
-    - name: Check out this repo
-      uses: actions/checkout@v4
-    - name: Use local action for casks
-      uses: ./.github/actions/new-packages
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        mastodon_access_token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-        mastodon_api_base_url: ${{ vars.MASTODON_API_BASE_URL }}
-        mastodon_client_secret: ${{ secrets.MASTODON_CLIENT_SECRET }}
-        max_toots_per_execution: ${{ vars.MAX_TOOTS_PER_EXECUTION }}
-        bsky_username: ${{ vars.BSKY_USERNAME }}
-        bsky_password: ${{ secrets.BSKY_PASSWORD }}
-        max_skeets_per_execution: ${{ vars.MAX_SKEETS_PER_EXECUTION }}
-        package_type: cask
+      - name: Check out this repo
+        uses: actions/checkout@v4
+      - name: Use local action for casks
+        uses: ./.github/actions/new-packages
+        with:
+          github_token: '${{ secrets.GITHUB_TOKEN }}'
+          mastodon_access_token: '${{ secrets.MASTODON_ACCESS_TOKEN }}'
+          mastodon_api_base_url: '${{ vars.MASTODON_API_BASE_URL }}'
+          mastodon_client_secret: '${{ secrets.MASTODON_CLIENT_SECRET }}'
+          max_toots_per_execution: '${{ vars.MAX_TOOTS_PER_EXECUTION }}'
+          bsky_username: '${{ vars.BSKY_USERNAME }}'
+          bsky_password: '${{ secrets.BSKY_PASSWORD }}'
+          max_skeets_per_execution: '${{ vars.MAX_SKEETS_PER_EXECUTION }}'
+          package_type: cask
