@@ -1,3 +1,4 @@
+---
 name: New Packages
 description: >-
   Capture the API output, update local state and post new packages to
@@ -28,7 +29,7 @@ inputs:
     description: The number of toots to output in a single execution
     required: true
   package_type:
-    description: 'The type of package, must have a matching state directory'
+    description: The type of package, must have a matching state directory
     required: true
 runs:
   using: composite
@@ -37,10 +38,10 @@ runs:
       with:
         version: 0.5.0
         enable-cache: true
-        github-token: '${{ inputs.GITHUB_TOKEN }}'
+        github-token: ${{ inputs.GITHUB_TOKEN }}
     - name: Fetch latest formula data
       shell: bash
-      run: 'uv run homebrew-new-bot api ${{ inputs.package_type }}'
+      run: uv run homebrew-new-bot api ${{ inputs.package_type }}
     - name: Update package database
       shell: bash
       run: |-
@@ -64,7 +65,7 @@ runs:
         ${{inputs.package_type }}
     - name: Commit and push if it changed
       shell: bash
-      if: '${{ always() }}'
+      if: ${{ always() }}
       run: |-
         git config user.name "Automated"
         git config user.email "actions@users.noreply.github.com"

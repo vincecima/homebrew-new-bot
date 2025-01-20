@@ -205,6 +205,15 @@ wheels = [
 ]
 
 [[package]]
+name = "distro"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/f8/98eea607f65de6527f8a2e8885fc8015d3e6f5775df186e443e0964a11c3/distro-1.9.0.tar.gz", hash = "sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed", size = 60722 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/b3/231ffd4ab1fc9d679809f356cebee130ac7daa00d6d6f3206dd4fd137e9e/distro-1.9.0-py3-none-any.whl", hash = "sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2", size = 20277 },
+]
+
+[[package]]
 name = "dnspython"
 version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -240,6 +249,7 @@ dev = [
     { name = "mypy" },
     { name = "ruff" },
     { name = "types-requests" },
+    { name = "yamlfix" },
 ]
 
 [package.metadata]
@@ -257,6 +267,7 @@ dev = [
     { name = "mypy", specifier = ">=1.13.0" },
     { name = "ruff", specifier = ">=0.7.4" },
     { name = "types-requests", specifier = ">=2.32.0.20241016" },
+    { name = "yamlfix", specifier = ">=1.17.0" },
 ]
 
 [[package]]
@@ -341,6 +352,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/34/10/c65f7a4ca38e4d1fd5537e689901c6cae6f1eeb49c0f8ecabbf991c48135/libipld-3.0.0-cp313-none-win32.whl", hash = "sha256:fed7d4f10a5ba37f069453e834429cdf4fb04d789cfc38a696ca069f9e401f5f", size = 176269 },
     { url = "https://files.pythonhosted.org/packages/ad/a3/199772db97f0ba8e7e7c8356bccd683537ce4fa628891f3e77648bbd92c5/libipld-3.0.0-cp313-none-win_amd64.whl", hash = "sha256:48fbff37e6f3378e45117de45f42332273bff29b227744ef6268c3406dd70bac", size = 193657 },
     { url = "https://files.pythonhosted.org/packages/60/0d/30235424a2ddbe8bf47060a422792b38d6e5479133d125a4e0cd76541911/libipld-3.0.0-cp313-none-win_arm64.whl", hash = "sha256:79d5d38dcc93de6157ced37d47fec0a8ce03edd53de52623c7d315063306eba3", size = 170574 },
+]
+
+[[package]]
+name = "maison"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "toml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2e/c5/c0574d47920f30eb84938bbe5220b249bde9b648b4517e1726e50a4b0967/maison-2.0.0.tar.gz", hash = "sha256:f5dafbbf4ce57bdb7cae128e075f457434b2cc9573b4f4bb4535f16d2ebd1cc5", size = 12074 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/30/24/cd1e7447cc43aeaf3dd8a336d79876262ebf0fd003b73796ee78cad19cd3/maison-2.0.0-py3-none-any.whl", hash = "sha256:e684fbab833f0f049d6e3556a127b8c5abe7cd18620f5b751a483e103dc4cbb5", size = 10093 },
 ]
 
 [[package]]
@@ -573,6 +597,28 @@ wheels = [
 ]
 
 [[package]]
+name = "ruyaml"
+version = "0.91.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "distro" },
+    { name = "setuptools" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4b/75/abbc7eab08bad7f47887a0555d3ac9e3947f89d2416678c08e025e449fdc/ruyaml-0.91.0.tar.gz", hash = "sha256:6ce9de9f4d082d696d3bde264664d1bcdca8f5a9dff9d1a1f1a127969ab871ab", size = 239075 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1e/9a/16ca152a04b231c179c626de40af1d5d0bc2bc57bc875c397706016ddb2b/ruyaml-0.91.0-py3-none-any.whl", hash = "sha256:50e0ee3389c77ad340e209472e0effd41ae0275246df00cdad0a067532171755", size = 108906 },
+]
+
+[[package]]
+name = "setuptools"
+version = "75.8.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/92/ec/089608b791d210aec4e7f97488e67ab0d33add3efccb83a056cbafe3a2a6/setuptools-75.8.0.tar.gz", hash = "sha256:c5afc8f407c626b8313a86e10311dd3f661c6cd9c09d4bf8c15c0e11f9f2b0e6", size = 1343222 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/69/8a/b9dc7678803429e4a3bc9ba462fa3dd9066824d3c607490235c6a796be5a/setuptools-75.8.0-py3-none-any.whl", hash = "sha256:e3982f444617239225d675215d51f6ba05f845d4eec313da4418fdbb56fb27e3", size = 1228782 },
+]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -623,6 +669,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ec/fe/802052aecb21e3797b8f7902564ab6ea0d60ff8ca23952079064155d1ae1/tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c", size = 81090 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/40/44/4a5f08c96eb108af5cb50b41f76142f0afa346dfa99d5296fe7202a11854/tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f", size = 35252 },
+]
+
+[[package]]
+name = "toml"
+version = "0.10.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f", size = 22253 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/6f/7120676b6d73228c96e17f1f794d8ab046fc910d781c8d151120c3f1569e/toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b", size = 16588 },
 ]
 
 [[package]]
@@ -684,4 +739,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/35/c6/12e3aab52c11aeb289e3dbbc05929e7a9d90d7a9173958477d3ef4f8ce2d/websockets-13.1-cp313-cp313-win32.whl", hash = "sha256:624459daabeb310d3815b276c1adef475b3e6804abaf2d9d2c061c319f7f187d", size = 158709 },
     { url = "https://files.pythonhosted.org/packages/41/d8/63d6194aae711d7263df4498200c690a9c39fb437ede10f3e157a6343e0d/websockets-13.1-cp313-cp313-win_amd64.whl", hash = "sha256:c518e84bb59c2baae725accd355c8dc517b4a3ed8db88b4bc93c78dae2974bf2", size = 159144 },
     { url = "https://files.pythonhosted.org/packages/56/27/96a5cd2626d11c8280656c6c71d8ab50fe006490ef9971ccd154e0c42cd2/websockets-13.1-py3-none-any.whl", hash = "sha256:a9a396a6ad26130cdae92ae10c36af09d9bfe6cafe69670fd3b6da9b07b4044f", size = 152134 },
+]
+
+[[package]]
+name = "yamlfix"
+version = "1.17.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "maison" },
+    { name = "pydantic" },
+    { name = "ruyaml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a9/04/e5061d4c353fad1240356458c999ddd452315a2485c3e8b00159767b3567/yamlfix-1.17.0.tar.gz", hash = "sha256:81d7220b62798d1dda580e1574b3d3d6926701ae8cd79588c4e0b33f2e345d85", size = 36923 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e9/14/10b17267fd650b5135aa728d4c8088c053781b4e2706bf2eabf6846fe501/yamlfix-1.17.0-py3-none-any.whl", hash = "sha256:0a510930a3a4f9655ca05a923594f2271849988f33f3c30363d5dee1261b6734", size = 28156 },
 ]
