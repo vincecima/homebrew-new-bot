@@ -27,4 +27,9 @@ dev = [
     "mypy>=1.13.0",
     "ruff>=0.7.4",
     "types-requests>=2.32.0.20241016",
+    "yamlfix>=1.17.0",
 ]
+
+[tool.yamlfix]
+# Effectively disable line width format/lint for YAML
+line_length = 10000
