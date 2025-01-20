@@ -61,6 +61,7 @@ runs:
         uv run homebrew-new-bot skeet --max_skeets_per_execution=${{
         inputs.max_skeets_per_execution }} --bsky_username=${{
         inputs.bsky_username }} --bsky_password=${{ inputs.bsky_password }}
+        ${{inputs.package_type }}
     - name: Commit and push if it changed
       shell: bash
       if: '${{ always() }}'
