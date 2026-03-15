@@ -1,0 +1,35 @@
+---
+name: Publish status page
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Capture, update and post latest formula
+      - Capture, update and post latest casks
+    types:
+      - completed
+permissions:
+  pages: write
+  id-token: write
+  contents: read
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: 0.5.21
+          enable-cache: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: uv run homebrew-new-bot database restore formula
+      - run: uv run homebrew-new-bot database restore cask
+      - run: uv run homebrew-new-bot status
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+      - id: deployment
+        uses: actions/deploy-pages@v4
