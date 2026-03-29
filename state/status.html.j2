@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homebrew New Bot - Status</title>
+  <style>
+    body { font-family: sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    h1 { border-bottom: 2px solid #f8a000; padding-bottom: .4rem; }
+    h2 { margin-top: 2rem; }
+    h3 { margin-top: 1.2rem; color: #555; }
+    table { border-collapse: collapse; width: 100%; margin-top: .5rem; }
+    th, td { border: 1px solid #ddd; padding: .4rem .7rem; text-align: left; }
+    th { background: #f5f5f5; }
+    .bar-wrap { background: #eee; border-radius: 4px; height: 12px; }
+    .bar { background: #f8a000; border-radius: 4px; height: 12px; }
+    .ok { color: green; font-weight: bold; }
+    .behind { color: #c00; }
+    .meta { color: #888; font-size: .85rem; margin-top: 3rem; border-top: 1px solid #eee; padding-top: .5rem; }
+  </style>
+</head>
+<body>
+  <h1>🍺 Homebrew New Bot — Queue Status</h1>
+{% for type_name, data in types.items() %}
+  <h2>{{ type_name | capitalize }}</h2>
+  <p>Total packages: <strong>{{ data.total }}</strong> (max insert_order: {{ data.max_order }})</p>
+  <h3>Service cursors</h3>
+  <table>
+    <thead><tr><th>Service</th><th>Cursor</th><th>Pending</th><th>Progress</th></tr></thead>
+    <tbody>
+{% for svc_name, svc in data.services.items() %}
+      <tr>
+        <td>{{ svc_name }}</td>
+        <td>{{ svc.cursor }}</td>
+        <td class="{{ 'ok' if svc.pending == 0 else 'behind' }}">{{ svc.pending }}</td>
+        <td>
+          <div class="bar-wrap"><div class="bar" style="width: {{ svc.progress_pct }}%;"></div></div>
+          {{ svc.progress_pct }}%
+        </td>
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>
+  <h3>Recently added (last 10)</h3>
+  <table>
+    <thead><tr><th>Order</th><th>ID</th><th>Description</th><th>Homepage</th><th>Added at</th></tr></thead>
+    <tbody>
+{% for pkg in data.recent %}
+      <tr>
+        <td>{{ pkg.insert_order }}</td>
+        <td>{{ pkg.id }}</td>
+        <td>{{ pkg.info.desc | default('') }}</td>
+        <td><a href="{{ pkg.info.homepage | default('#') }}">{{ pkg.info.homepage | default('') }}</a></td>
+        <td>{{ pkg.added_at }}</td>
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
+  <p class="meta">Generated at {{ generated_at }}</p>
+</body>
+</html>

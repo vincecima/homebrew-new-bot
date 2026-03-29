@@ -3,6 +3,7 @@ import logging
 from collections.abc import Callable
 from datetime import datetime, timezone
 from enum import StrEnum
+from pathlib import Path
 from typing import Any, cast
 
 import click
@@ -116,6 +117,59 @@ def update(package_type: PackageType) -> None:
 @package_type_option
 def rss(package_type: PackageType) -> None:
     pass
+
+
+@cli.command()
+@click.option("--output", default="docs/index.html", show_default=True)
+def status(output: str) -> None:
+    type_data = {}
+    for pkg_type in PackageType:
+        db = Database(f"state/{pkg_type}/packages.db")
+        row = next(
+            db.query(
+                "SELECT COUNT(*) as total, MAX(insert_order) as max_order FROM packages"
+            )
+        )
+        total, max_order = row["total"], row["max_order"]
+
+        services = {}
+        for service in ("mastodon", "bsky"):
+            with open(f"state/{pkg_type}/{service}.cursor") as f:
+                cursor = int(f.read().strip())
+            pending = max_order - cursor
+            pct = round(cursor / max_order * 100, 1) if max_order else 0.0
+            services[service] = {
+                "cursor": cursor,
+                "pending": pending,
+                "progress_pct": pct,
+            }
+
+        recent = []
+        for pkg in db.query(
+            "SELECT insert_order, id, added_at, info FROM packages ORDER BY insert_order DESC LIMIT 10"
+        ):
+            recent.append({**pkg, "info": json.loads(pkg["info"])})
+
+        type_data[pkg_type] = {
+            "total": total,
+            "max_order": max_order,
+            "services": services,
+            "recent": recent,
+        }
+
+    template_env = Environment(
+        loader=FileSystemLoader("state"),
+        autoescape=select_autoescape(["html"]),
+        trim_blocks=True,
+    )
+    html = template_env.get_template("status.html.j2").render(
+        types=type_data,
+        generated_at=datetime.now(timezone.utc).isoformat(),
+    )
+    out = Path(output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(html)
+    logging.info(f"Status page written to {output}")
 
 
 def validate_mastodon_config(
