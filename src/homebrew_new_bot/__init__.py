@@ -110,12 +110,6 @@ def update(package_type: PackageType) -> None:
 
 
 @cli.command()
-@package_type_option
-def rss(package_type: PackageType) -> None:
-    pass
-
-
-@cli.command()
 @click.option("--output", default="docs/index.html", show_default=True)
 def status(output: str) -> None:
     type_data = {}
