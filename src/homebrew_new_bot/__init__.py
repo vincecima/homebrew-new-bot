@@ -88,22 +88,19 @@ def restore(package_type: PackageType) -> None:
 @package_type_option
 def update(package_type: PackageType) -> None:
     added_at = datetime.now(timezone.utc)
-    try:
-        with open(f"state/{package_type}/api.json", "rb") as file:
-            # NOTE: typing.IO and io.BaseIO are incompatible https://github.com/python/typeshed/issues/6077
-            rows, _fmt = rows_from_file(file)
-            packages = list(
-                map(
-                    lambda x: {
-                        "id": extract_id_value(package_type, x),
-                        "added_at": added_at.isoformat(),
-                        "info": x,
-                    },
-                    rows,
-                )
+    with open(f"state/{package_type}/api.json", "rb") as file:
+        # NOTE: typing.IO and io.BaseIO are incompatible https://github.com/python/typeshed/issues/6077
+        rows, _fmt = rows_from_file(file)
+        packages = list(
+            map(
+                lambda x: {
+                    "id": extract_id_value(package_type, x),
+                    "added_at": added_at.isoformat(),
+                    "info": x,
+                },
+                rows,
             )
-    except Exception as ex:
-        raise ex
+        )
 
     db = Database(f"state/{package_type}/packages.db")
     packages_table = cast(Table, db.table("packages")).create(
