@@ -168,9 +168,7 @@ def status(output: str) -> None:
     logging.info(f"Status page written to {output}")
 
 
-def validate_mastodon_config(
-    ctx: click.Context, param: click.ParamType, value: str
-) -> str:
+def validate_required(ctx: click.Context, param: click.ParamType, value: str) -> str:
     if value is None:
         raise click.BadParameter("required")
     else:
@@ -183,19 +181,19 @@ def validate_mastodon_config(
     "--mastodon_api_base_url",
     envvar="MASTODON_API_BASE_URL",
     show_envvar=True,
-    callback=validate_mastodon_config,
+    callback=validate_required,
 )
 @click.option(
     "--mastodon_access_token",
     envvar="MASTODON_ACCESS_TOKEN",
     show_envvar=True,
-    callback=validate_mastodon_config,
+    callback=validate_required,
 )
 @click.option(
     "--mastodon_client_secret",
     envvar="MASTODON_CLIENT_SECRET",
     show_envvar=True,
-    callback=validate_mastodon_config,
+    callback=validate_required,
 )
 @click.option("--max_toots_per_execution", default=1)
 # TODO: Break this method up with helpers
@@ -258,26 +256,19 @@ def toot(
         file.write(str(new_cursor))
 
 
-def validate_bsky_config(ctx: click.Context, param: click.ParamType, value: str) -> str:
-    if value is None:
-        raise click.BadParameter("required")
-    else:
-        return value
-
-
 @cli.command()
 @package_type_option
 @click.option(
     "--bsky_username",
     envvar="BSKY_USERNAME",
     show_envvar=True,
-    callback=validate_bsky_config,
+    callback=validate_required,
 )
 @click.option(
     "--bsky_password",
     envvar="BSKY_PASSWORD",
     show_envvar=True,
-    callback=validate_bsky_config,
+    callback=validate_required,
 )
 @click.option("--max_skeets_per_execution", default=1)
 # TODO: Break this method up with helpers
