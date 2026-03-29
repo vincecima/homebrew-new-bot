@@ -48,14 +48,14 @@ def cli(verbose: bool) -> None:
 @cli.command()
 @package_type_option
 def api(package_type: PackageType) -> None:
-    r = requests.get(f"https://formulae.brew.sh/api/{package_type}.json")
+    r = requests.get(
+        f"https://formulae.brew.sh/api/{package_type}.json", timeout=60
+    )
+    r.raise_for_status()
     # TODO: use last-modified for added_at and to short circuit full API request (via HEAD)
     # last_modified = email.utils.parsedate_to_datetime(r.headers["last-modified"])
-    try:
-        with open(f"state/{package_type}/api.json", "w") as file:
-            file.write(r.text)
-    except Exception as ex:
-        raise ex
+    with open(f"state/{package_type}/api.json", "w") as file:
+        file.write(r.text)
 
 
 # NOTE: Create database parent for subcommands
