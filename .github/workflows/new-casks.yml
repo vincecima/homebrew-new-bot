@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out this repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Use local action for casks
         uses: ./.github/actions/new-packages
         with:
