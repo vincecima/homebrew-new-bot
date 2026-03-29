@@ -91,7 +91,7 @@ def update(package_type: PackageType) -> None:
     try:
         with open(f"state/{package_type}/api.json", "rb") as file:
             # NOTE: typing.IO and io.BaseIO are incompatible https://github.com/python/typeshed/issues/6077
-            rows, format = rows_from_file(file)
+            rows, _fmt = rows_from_file(file)
             packages = list(
                 map(
                     lambda x: {
