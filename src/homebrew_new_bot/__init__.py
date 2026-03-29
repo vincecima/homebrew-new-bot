@@ -24,10 +24,9 @@ class PackageType(StrEnum):
 def package_type_option(
     fn: Callable[..., None],
 ) -> Callable[..., None]:
-    click.argument(
+    return click.argument(
         "package_type", type=click.Choice(list(PackageType), case_sensitive=False)
     )(fn)
-    return fn
 
 
 def extract_id_value(package_type: PackageType, package_info: dict[str, Any]) -> str:
