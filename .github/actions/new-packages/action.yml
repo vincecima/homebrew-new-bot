@@ -34,9 +34,9 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: astral-sh/setup-uv@v2
+    - uses: astral-sh/setup-uv@v5
       with:
-        version: 0.5.0
+        version: 0.5.21
         enable-cache: true
         github-token: ${{ inputs.GITHUB_TOKEN }}
     - name: Fetch latest formula data
