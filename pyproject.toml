@@ -1,7 +1,7 @@
 [project]
 name = "homebrew-new-bot"
 version = "0.1.0"
-description = "Add your description here"
+description = "A bot that tracks new Homebrew packages and posts announcements to Mastodon and Bluesky"
 authors = [
     { name = "Vince Cima", email = "contact@vincecima.com" }
 ]
