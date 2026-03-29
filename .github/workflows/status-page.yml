@@ -3,11 +3,8 @@ name: Publish status page
 on:
   workflow_dispatch:
   workflow_run:
-    workflows:
-      - Capture, update and post latest formula
-      - Capture, update and post latest casks
-    types:
-      - completed
+    workflows: ['Capture, update and post latest formula', 'Capture, update and post latest casks']
+    types: [completed]
 permissions:
   pages: write
   id-token: write

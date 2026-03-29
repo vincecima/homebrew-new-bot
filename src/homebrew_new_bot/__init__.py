@@ -125,7 +125,11 @@ def status(output: str) -> None:
     type_data = {}
     for pkg_type in PackageType:
         db = Database(f"state/{pkg_type}/packages.db")
-        row = next(db.query("SELECT COUNT(*) as total, MAX(insert_order) as max_order FROM packages"))
+        row = next(
+            db.query(
+                "SELECT COUNT(*) as total, MAX(insert_order) as max_order FROM packages"
+            )
+        )
         total, max_order = row["total"], row["max_order"]
 
         services = {}
@@ -134,13 +138,24 @@ def status(output: str) -> None:
                 cursor = int(f.read().strip())
             pending = max_order - cursor
             pct = round(cursor / max_order * 100, 1) if max_order else 0.0
-            services[service] = {"cursor": cursor, "pending": pending, "progress_pct": pct}
+            services[service] = {
+                "cursor": cursor,
+                "pending": pending,
+                "progress_pct": pct,
+            }
 
         recent = []
-        for pkg in db.query("SELECT insert_order, id, added_at, info FROM packages ORDER BY insert_order DESC LIMIT 10"):
+        for pkg in db.query(
+            "SELECT insert_order, id, added_at, info FROM packages ORDER BY insert_order DESC LIMIT 10"
+        ):
             recent.append({**pkg, "info": json.loads(pkg["info"])})
 
-        type_data[pkg_type] = {"total": total, "max_order": max_order, "services": services, "recent": recent}
+        type_data[pkg_type] = {
+            "total": total,
+            "max_order": max_order,
+            "services": services,
+            "recent": recent,
+        }
 
     template_env = Environment(
         loader=FileSystemLoader("state"),
