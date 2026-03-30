@@ -24,10 +24,9 @@ class PackageType(StrEnum):
 def package_type_option(
     fn: Callable[..., None],
 ) -> Callable[..., None]:
-    click.argument(
+    return click.argument(
         "package_type", type=click.Choice(list(PackageType), case_sensitive=False)
     )(fn)
-    return fn
 
 
 def extract_id_value(package_type: PackageType, package_info: dict[str, Any]) -> str:
@@ -49,14 +48,12 @@ def cli(verbose: bool) -> None:
 @cli.command()
 @package_type_option
 def api(package_type: PackageType) -> None:
-    r = requests.get(f"https://formulae.brew.sh/api/{package_type}.json")
+    r = requests.get(f"https://formulae.brew.sh/api/{package_type}.json", timeout=60)
+    r.raise_for_status()
     # TODO: use last-modified for added_at and to short circuit full API request (via HEAD)
     # last_modified = email.utils.parsedate_to_datetime(r.headers["last-modified"])
-    try:
-        with open(f"state/{package_type}/api.json", "w") as file:
-            file.write(r.text)
-    except Exception as ex:
-        raise ex
+    with open(f"state/{package_type}/api.json", "w") as file:
+        file.write(r.text)
 
 
 # NOTE: Create database parent for subcommands
@@ -89,34 +86,25 @@ def restore(package_type: PackageType) -> None:
 @package_type_option
 def update(package_type: PackageType) -> None:
     added_at = datetime.now(timezone.utc)
-    try:
-        with open(f"state/{package_type}/api.json", "rb") as file:
-            # NOTE: typing.IO and io.BaseIO are incompatible https://github.com/python/typeshed/issues/6077
-            rows, format = rows_from_file(file)
-            packages = list(
-                map(
-                    lambda x: {
-                        "id": extract_id_value(package_type, x),
-                        "added_at": added_at.isoformat(),
-                        "info": x,
-                    },
-                    rows,
-                )
+    with open(f"state/{package_type}/api.json", "rb") as file:
+        # NOTE: typing.IO and io.BaseIO are incompatible https://github.com/python/typeshed/issues/6077
+        rows, _fmt = rows_from_file(file)
+        packages = list(
+            map(
+                lambda x: {
+                    "id": extract_id_value(package_type, x),
+                    "added_at": added_at.isoformat(),
+                    "info": x,
+                },
+                rows,
             )
-    except Exception as ex:
-        raise ex
+        )
 
     db = Database(f"state/{package_type}/packages.db")
     packages_table = cast(Table, db.table("packages")).create(
         {"id": str, "added_at": datetime, "info": str}, pk="id", if_not_exists=True
     )
     packages_table.insert_all(packages, ignore=True)
-
-
-@cli.command()
-@package_type_option
-def rss(package_type: PackageType) -> None:
-    pass
 
 
 @cli.command()
@@ -172,13 +160,53 @@ def status(output: str) -> None:
     logging.info(f"Status page written to {output}")
 
 
-def validate_mastodon_config(
-    ctx: click.Context, param: click.ParamType, value: str
-) -> str:
+def validate_required(ctx: click.Context, param: click.ParamType, value: str) -> str:
     if value is None:
         raise click.BadParameter("required")
     else:
         return value
+
+
+def _post_new_packages(
+    package_type: PackageType,
+    service_name: str,
+    max_posts: int,
+    post_fn: Callable[[str], None],
+) -> None:
+    with open(f"state/{package_type}/{service_name}.cursor") as file:
+        cursor = int(file.read().strip())
+        logging.info(f"Existing cursor value: {cursor}")
+        new_cursor = cursor
+
+    db = Database(f"state/{package_type}/packages.db")
+    packages = list(
+        db.query(
+            "select id, added_at, info, insert_order from packages where insert_order > :cursor order by insert_order ASC",
+            {"cursor": cursor},
+        )
+    )
+
+    if not packages:
+        logging.info(f"No packages found with cursor after {cursor}")
+        return
+    logging.info(
+        f"Found {len(packages)} packages to be posted, {packages[0]['id']}...{packages[-1]['id']}"
+    )
+    template_env = Environment(
+        loader=FileSystemLoader(f"state/{package_type}"),
+        autoescape=select_autoescape(),
+        trim_blocks=True,
+    )
+    template = template_env.get_template("template.j2")
+    for package in packages[:max_posts]:
+        package_info = json.loads(package["info"])
+        template_output = template.render(**package_info)
+        post_fn(template_output)
+        new_cursor = package["insert_order"]
+
+    with open(f"state/{package_type}/{service_name}.cursor", "w") as file:
+        logging.info(f"New cursor value: {new_cursor}")
+        file.write(str(new_cursor))
 
 
 @cli.command()
@@ -187,22 +215,21 @@ def validate_mastodon_config(
     "--mastodon_api_base_url",
     envvar="MASTODON_API_BASE_URL",
     show_envvar=True,
-    callback=validate_mastodon_config,
+    callback=validate_required,
 )
 @click.option(
     "--mastodon_access_token",
     envvar="MASTODON_ACCESS_TOKEN",
     show_envvar=True,
-    callback=validate_mastodon_config,
+    callback=validate_required,
 )
 @click.option(
     "--mastodon_client_secret",
     envvar="MASTODON_CLIENT_SECRET",
     show_envvar=True,
-    callback=validate_mastodon_config,
+    callback=validate_required,
 )
 @click.option("--max_toots_per_execution", default=1)
-# TODO: Break this method up with helpers
 def toot(
     package_type: PackageType,
     mastodon_api_base_url: str,
@@ -215,58 +242,12 @@ def toot(
         access_token=mastodon_access_token,
         client_secret=mastodon_client_secret,
     )
-
-    with open(f"state/{package_type}/mastodon.cursor") as file:
-        cursor = int(file.read().strip())
-        logging.info(f"Existing cursor value: {cursor}")
-        new_cursor = cursor
-
-    # TODO: Factor out loading from correct state folder
-    db = Database(f"state/{package_type}/packages.db")
-    # TODO: Load data into dataclass
-    # TODO: Move query out of inline?
-    packages = list(
-        db.query(
-            "select id, added_at, info, insert_order from packages where insert_order > :cursor order by insert_order ASC",
-            {"cursor": cursor},
-        )
+    _post_new_packages(
+        package_type,
+        "mastodon",
+        max_toots_per_execution,
+        lambda text: mastodon.status_post(status=text),
     )
-
-    if not packages:
-        logging.info(f"No packages found with cursor after {cursor}")
-        return
-    logging.info(
-        f"Found {len(packages)} packages to be posted, {packages[0]['id']}...{packages[-1]['id']}"
-    )
-    template_env = Environment(
-        loader=FileSystemLoader(f"state/{package_type}"),
-        autoescape=select_autoescape(),
-        trim_blocks=True,
-    )
-    template = template_env.get_template("template.j2")
-    # TODO: Is this idiomatic Python?
-    for i, package in enumerate(packages):
-        if (i) >= max_toots_per_execution:
-            break
-        else:
-            package_info = json.loads(package["info"])
-            # TODO: Remove dictionary reference
-            template_output = template.render(**package_info)
-            # TODO: Handle failure (backoff cursor)
-            mastodon.status_post(status=template_output)
-            new_cursor = package["insert_order"]
-
-    with open(f"state/{package_type}/mastodon.cursor", "w") as file:
-        # TODO: Do atomic write and replace
-        logging.info(f"New cursor value: {new_cursor}")
-        file.write(str(new_cursor))
-
-
-def validate_bsky_config(ctx: click.Context, param: click.ParamType, value: str) -> str:
-    if value is None:
-        raise click.BadParameter("required")
-    else:
-        return value
 
 
 @cli.command()
@@ -275,16 +256,15 @@ def validate_bsky_config(ctx: click.Context, param: click.ParamType, value: str)
     "--bsky_username",
     envvar="BSKY_USERNAME",
     show_envvar=True,
-    callback=validate_bsky_config,
+    callback=validate_required,
 )
 @click.option(
     "--bsky_password",
     envvar="BSKY_PASSWORD",
     show_envvar=True,
-    callback=validate_bsky_config,
+    callback=validate_required,
 )
 @click.option("--max_skeets_per_execution", default=1)
-# TODO: Break this method up with helpers
 def skeet(
     package_type: PackageType,
     bsky_username: str,
@@ -293,48 +273,9 @@ def skeet(
 ) -> None:
     bsky = Client()
     bsky.login(bsky_username, bsky_password)
-
-    with open(f"state/{package_type}/bsky.cursor") as file:
-        cursor = int(file.read().strip())
-        logging.info(f"Existing cursor value: {cursor}")
-        new_cursor = cursor
-
-    # TODO: Factor out loading from correct state folder
-    db = Database(f"state/{package_type}/packages.db")
-    # TODO: Load data into dataclass
-    # TODO: Move query out of inline?
-    packages = list(
-        db.query(
-            "select id, added_at, info, insert_order from packages where insert_order > :cursor order by insert_order ASC",
-            {"cursor": cursor},
-        )
+    _post_new_packages(
+        package_type,
+        "bsky",
+        max_skeets_per_execution,
+        bsky.send_post,
     )
-
-    if not packages:
-        logging.info(f"No packages found with cursor after {cursor}")
-        return
-    logging.info(
-        f"Found {len(packages)} packages to be posted, {packages[0]['id']}...{packages[-1]['id']}"
-    )
-    template_env = Environment(
-        loader=FileSystemLoader(f"state/{package_type}"),
-        autoescape=select_autoescape(),
-        trim_blocks=True,
-    )
-    template = template_env.get_template("template.j2")
-    # TODO: Is this idiomatic Python?
-    for i, package in enumerate(packages):
-        if (i) >= max_skeets_per_execution:
-            break
-        else:
-            package_info = json.loads(package["info"])
-            # TODO: Remove dictionary reference
-            template_output = template.render(**package_info)
-            # TODO: Handle failure (backoff cursor)
-            bsky.send_post(template_output)
-            new_cursor = package["insert_order"]
-
-    with open(f"state/{package_type}/bsky.cursor", "w") as file:
-        # TODO: Do atomic write and replace
-        logging.info(f"New cursor value: {new_cursor}")
-        file.write(str(new_cursor))
